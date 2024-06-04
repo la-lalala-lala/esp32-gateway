@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>物联网设备平台-登录</title>
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/font-awesome.min.css">
+    <link rel="stylesheet" href="./css/loading.css">
+    <style>
+        /*重置基础样式*/
+        html,body{
+            margin: 0;
+            padding: 0;
+            color: #9cb17e;
+            background-color: #e8f3e2;
+        }
+        /*根容器*/
+        .root-container {
+            color: #9cb17e;
+            font-size: 12px;
+            font-family: "微软雅黑","arial";
+            padding: 0;
+            margin: 0;
+        }
+        /*头部区域*/
+        header {
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        /*头部技术支持区域*/
+        header .header-nav{
+          background-color: #b5d780;
+          color: #fff;
+          padding: 14px;
+          text-align: right;
+          font-size: 13px;
+        }
+
+        /*头部项目名区域*/
+        header .header-banner{
+          background-color:#aec58b;
+          border-color: transparent;
+          height: 150px;
+        }
+
+        /*头部项目名和用户的容器*/
+        header .header-banner .project-user{
+          margin-top: 40px;
+          display: flex;
+          flex-direction: row;
+        }
+
+        /*头部项目名区域*/
+        header .header-banner .project-user .project-div{
+          width: 160px;
+          color:#fff;
+          display: flex;
+          justify-content: center;
+          flex-direction: column;
+          font-weight: bolder;
+          font-size: 22px;
+        }
+
+        /*头部用户区域*/
+        header .header-banner .project-user .login-icon {
+          height: 60px;
+          width: 60px;
+          padding: 13px;
+          border-radius: 50%;
+          font-size: 30px;
+          margin-bottom: 20px;
+          color: #fff;
+          text-align: center;
+          cursor: pointer;
+          background-color: #b5d780;
+          -webkit-border-radius: 50%;
+          -moz-border-radius: 50%;
+        }
+
+
+        /*底部版权区域*/
+        footer{
+          color: #fff;
+          background-color: #9cb17e;
+          padding: 20px 0;
+          bottom: 0;
+          width: 100vw;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        /*底部版权区域文字*/
+        footer span {
+          float:left;
+          padding-right: 24px;
+          font-size: 13px;
+          font-family: inherit;
+        }
+
+        section{
+            /*height: -webkit-fill-available;*/
+
+        }
+
+        header .project-name{
+            padding-left: 1.5em;
+            font-size: 21px;
+            color: #fff;
+            line-height: 50px;
+        }
+
+        section .main{
+            padding-top: 2em;
+            padding-bottom: 2em;
+            height:auto;
+            min-height: 400px;
+        }
+
+        /*页面栏目的分割线*/
+        .page-head-line{
+            font-weight: 900;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #9cb17e;
+            text-transform: uppercase;
+            color: #9cb17e;
+            font-size: 20px;
+            margin-bottom: 40px;
+        }
+
+
+    </style>
+</head>
+<body>
+<!-- loading -->
+<div class='loader' style="display: none">
+  <div class='loader_overlay'></div>
+  <div class='loader_cogs'>
+    <div class='loader_cogs__top'>
+      <div class='top_part'></div>
+      <div class='top_part'></div>
+      <div class='top_part'></div>
+      <div class='top_hole'></div>
+    </div>
+    <div class='loader_cogs__left'>
+      <div class='left_part'></div>
+      <div class='left_part'></div>
+      <div class='left_part'></div>
+      <div class='left_hole'></div>
+    </div>
+    <div class='loader_cogs__bottom'>
+      <div class='bottom_part'></div>
+      <div class='bottom_part'></div>
+      <div class='bottom_part'></div>
+      <div class='bottom_hole'></div>
+    </div>
+    <p>loading...</p>
+  </div>
+</div>
+<!-- 模态框 -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">提示</h4>
+      </div>
+      <div class="modal-body" id="global-notice-text"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" id="modal-confirm" style="background-color:#9cb17e;border-color:#9cb17e">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="root-container">
+  <!--头部区域-->
+    <header>
+      <div class="header-nav">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-12">
+              <strong>Email:</strong> saya@saya.ac.cn&nbsp;&nbsp; <strong>Support:</strong> 极客印记实验室中心
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="header-banner">
+        <div class="container">
+          <div class="project-user">
+            <div class="project-div">
+              <div class="text-left">
+                物联网网关 +
+              </div>
+              <div class="text-right">
+                + 控制中心
+              </div>
+            </div>
+            <div style="padding-left: 30px;width:70px;">
+              <i class="fa fa-user-plus login-icon"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <section>
+      <div class="alert alert-success alert-dismissable">
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+          &times;
+        </button>
+        <div class="container">
+          <div class="row">
+            <div class="col-md-12">
+              <span class="fa fa-bullhorn"></span>&nbsp;:&nbsp;由于物联网的特殊性，为了您的设备安全。请您妥善保管好您的密码，请不要在公共场合登录使用!
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container main">
+          <div class="row">
+              <div class="col-md-12">
+                  <h4 class="page-head-line">用户身份认证入口</h4>
+              </div>
+          </div>
+          <div class="row">
+              <div class="col-md-6">
+                  <h4>请通过账号和密码进行登录</h4>
+                  <hr/>
+                  <br/>
+                  <label>用户名 : </label>
+                  <input type="text" class="form-control" id="name" maxlength="32" placeholder="请输入账号">
+                  <br/>
+                  <label>密码 : </label>
+                  <input type="password" class="form-control" id="password" maxlength="32" placeholder="请输入密码">
+                  <br/>
+                  <hr/>
+                  <br/>
+                  <a href="javascript:void(0)" class="btn btn-info" style="background-color:#9cb17e;border-color: transparent" id="go">
+                    <span class="fa fa-user">&nbsp;进入平台</span>&nbsp;</a>
+              </div>
+              <div class="col-md-6">
+                  <div class="alert alert-info">
+                      <strong>亲爱的用户，欢迎使用本服务平台。在使用之前，请您务必注意以下须知：</strong>
+                      <ul>
+                          <li>设备启动后，主板上的指示灯先常亮，待设备自检完毕后，指示灯将熄灭</li>
+                          <li>设备默认开启STA（作为无线终端接入路由器）+AP（自开启无线热点） </li>
+                          <li>设备默认开启的WIFI名称为：极客印记**，密码参见设备底部标签</li>
+                          <li>在没有连接上路由器的前提下，您只能通过连接本设备的WIFI进行设置</li>
+                          <li>平台的管理入口地址为：192.168.4.1（需要连接本设备WIFI）</li>
+                          <li>若账号在正常情况下，无法登录时，请及时联系实验室中心</li>
+                      </ul>
+                  </div>
+                  <div class="alert alert-success">
+                      <strong>功能介绍:</strong>
+                      <ul>
+                          <li>支持STA（作为无线终端接入路由器）/AP（自开启无线热点）模式参数自定义配置</li>
+                          <li>支持本地局域网&基于MQTT的远程控制</li>
+                          <li>支持MQTT服务器自定义配置</li>
+                          <li>支持传感器数据的上报采集</li>
+                          <li>支持设备的远程控制</li>
+                          <li>支持指标&事件联动</li>
+                      </ul>
+                  </div>
+              </div>
+          </div>
+      </div>
+    </section>
+    <!--版权区域-->
+    <footer>
+        <div class="container">
+            <p>Copyright © 2016-<script>document.write(new Date().getFullYear())</script> Saya.ac.cn-极客印记 All rights reserved 国家工信部域名备案信息：[<a href="https://beian.miit.gov.cn/" rel="noopener noreferrer" style="color: #fff" target="_blank">saya.ac.cn/蜀ICP备2021013893号</a>]</p>
+            <p>通讯地址：四川省宜宾市五粮液大道东段酒圣路8号(宜宾学院本部) 邮编：644000 Email：saya@saya.ac.cn</p>
+            <p>建议您使用Google Chrome，分辨率1920*1080及以上浏览，获得更好用户体验</p>
+        </div>
+    </footer>
+</div>
+<script src="./js/jquery.min.js"></script>
+<script src="./js/bootstrap.min.js"></script>
+<script type="module">
+    import {login_request} from './js/config.js'
+    $(function () {
+        $('#go').click(function () {
+            var name = $('#name').val().trim();
+            var password = $('#password').val().trim();
+            const $modal = $('#myModal')
+            if (name === "" || password === "") {
+              notice($modal,'请正确输入账户和密码');
+              return false;
+             } else {
+                $('.loader').show();
+                login_request({'name': name, 'password': password}).then(data=>{
+                    $(".loader").show().delay(500).hide(0);
+                    if (data.code === 0) {
+                        window.location.href = 'home.html';
+                    } else {
+                        notice($modal,'用户名不存在或密码错误');
+                    }
+                }).catch(error=>{
+                    $(".loader").show().delay(3000).hide(0);
+                    notice($modal,'网络发送异常，请稍后再试');
+                    console.log('登录异常:',error);
+                    return false;
+                })
+                return false;
+            }
+        });
+    })
+
+    /**
+     * 打开询问框
+     * @param $modal 模态框dom
+     * @param noticeVal 提示内容
+     * @param callBack 回调函数
+     * @param param 参数
+     */
+    function confirm($modal,noticeVal,callBack,param){
+      $modal.on('show.bs.modal', function () {
+        // 为防止重复执行，在这里需要清除
+        $modal.off('show.bs.modal')
+        $modal.find('#global-notice-text').text(noticeVal);
+        //绑定回调函数。点击确定将执行此方法
+        $modal.find('#modal-confirm').on('click', function () {
+          $modal.find('#modal-confirm').off("click");
+          //如果这个参数a是函数，那么就执行这个函数，否则打印a的值
+          if(typeof callBack === "function"){
+            console.log("执行回调:",callBack.name)
+            console.log("参数:",param)
+            callBack(param);
+          }else{
+            console.log('无效的回调，直接打印',callBack)
+          }
+          $modal.modal('hide')
+        });
+      });
+      $modal.modal('show');
+    }
+
+    /**
+     * 打开提示框
+     * @param $modal 模态框dom
+     * @param noticeVal 提示内容
+     */
+    function notice($modal,noticeVal){
+      $modal.on('show.bs.modal', function () {
+        // 为防止重复执行，在这里需要清除
+        $modal.off('show.bs.modal')
+        $modal.find('#global-notice-text').text(noticeVal);
+        //绑定回调函数。点击确定将执行此方法
+        $modal.find('#modal-confirm').on('click', function () {
+          $modal.find('#modal-confirm').off("click");
+          $modal.modal('hide')
+        });
+      });
+      $modal.modal('show');
+    }
+
+</script>
+</body>
+</html>

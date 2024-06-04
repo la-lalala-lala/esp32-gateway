@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>物联网设备平台</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      color: #9cb17e;
+      background-color: #e8f3e2;
+    }
+    /*覆写表格的标题头样式*/
+    caption {
+      color: #9cb17e;
+    }
+  </style>
+
+</head>
+<body>
+  <div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="alert alert-success">为使网关接入互联网，建议您的网关配置好相关的无线路由器连接信息，设置完毕后，请重启网关。</div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <table class="table table-bordered">
+        <caption>当前设备连接路由器信息</caption>
+        <colgroup>
+          <col width="20%"/>
+          <col width="30%"/>
+          <col width="20%"/>
+          <col width="30%"/>
+        </colgroup>
+        <tbody>
+        <tr>
+          <td class="text-right">本地IP:</td>
+          <td id="localIP"></td>
+          <td class="text-right">本地IPv6:</td>
+          <td id="localIPv6"></td>
+        </tr>
+        <tr>
+          <td class="text-right">网关:</td>
+          <td id="gatewayIP"></td>
+          <td class="text-right">DNS:</td>
+          <td id="dnsIP"></td>
+        </tr>
+        <tr>
+          <td class="text-right">物理地址:</td>
+          <td id="macAddress"></td>
+          <td class="text-right">网络ID:</td>
+          <td id="networkID"></td>
+        </tr>
+        <tr>
+          <td class="text-right">连接状态:</td>
+          <td id="connect_router_flag"></td>
+          <td class="text-right">主机名:</td>
+          <td id="getHostname"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="col-md-8">
+        <form class="form-horizontal" role="form">
+          <div class="form-group form-check form-switch">
+            <label>是否开启</label>
+            &nbsp;
+            <input id="flag" type="checkbox">
+          </div>
+          <div class="form-group">
+            <label>Wifi连接状态</label>
+            &nbsp;
+            <input id="status" type="checkbox" disabled="disabled">
+          </div>
+          <div class="form-group">
+            <label>Wifi名称</label>
+            <input type="text" id="sta_ssid" maxlength="16" minlength="4" class="form-control" placeholder="文本输入">
+          </div>
+          <div class="form-group">
+            <label>Wifi密码</label>
+            <input type="text" id="sta_password" maxlength="16" minlength="8" class="form-control" placeholder="文本输入">
+          </div>
+          <div class="form-group">
+            <button type="button" onclick="submitData()" class="btn btn-info" style="background-color:#9cb17e;border-color: transparent"><span class="fa fa-check"></span>&nbsp;提交</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+<script src="./js/jquery.min.js"></script>
+<script src="./js/bootstrap.min.js"></script>
+  <script type="module">
+    import {get_sta_request,set_sta_request} from './js/config.js'
+  $(function () {
+    getData()
+  })
+
+  function getData() {
+    const $modal = $(window.parent.document).find('#myModal')
+    $(window.parent.document).find(".loader").show();
+    get_sta_request().then(data=>{
+      $(window.parent.document).find(".loader").hide();
+      if (data.code === 0) {
+        // 渲染数据
+        $("#localIP").text(data.data.localIP);
+        $("#localIPv6").text(data.data.localIPv6);
+        $("#gatewayIP").text(data.data.gatewayIP);
+        $("#dnsIP").text(data.data.dnsIP);
+        $("#macAddress").text(data.data.macAddress);
+        $("#networkID").text(data.data.networkID);
+        $("#connect_router_flag").text(data.data.connect_router_flag);
+        $("#getHostname").text(data.data.getHostname);
+        $("#sta_ssid").val(data.data.sta_ssid);
+        $("#sta_password").val(data.data.sta_password);
+        const status = data.data.connect_router_flag;
+        if(status){
+          $("#status").prop("checked",true)
+        }
+        const flag = data.data.router_connect;
+        if(flag){
+          $("#flag").prop("checked",true)
+        }
+      } else {
+        window.parent.notice($modal,'获取数据失败，请稍后重试！')
+      }
+    }).catch(error=>{
+      $(window.parent.document).find(".loader").show().hide();
+      window.parent.notice($modal,'网络发送异常，请稍后再试');
+      console.log('获取sta数据异常:',error);
+      return false;
+    })
+  }
+
+  function submitData() {
+    const flag = checkData();
+    if (!flag) {
+      return
+    }
+    const sta_ssid = $("#sta_ssid").val().trim();
+    const sta_password = $("#sta_password").val().trim();
+    const routerFlag = $("#flag").is(":checked");
+    // 提交数据
+    const $modal = $(window.parent.document).find('#myModal')
+    $(window.parent.document).find(".loader").show();
+    set_sta_request({ssid: sta_ssid,password: sta_password,flag: true===routerFlag?1:0,})    .then(data=>{
+      $(window.parent.document).find(".loader").hide();
+      console.log(data)
+      if (data.code === 0) {
+        window.parent.notice($modal,'修改成功');
+      } else {
+        window.parent.notice($modal,'修改失败');
+      }
+    }).catch(error=>{
+      $(window.parent.document).find(".loader").show().hide();
+      window.parent.notice($modal,'网络发送异常，请稍后再试');
+      console.log('设置sta异常:',error);
+      return false;
+    })
+  }
+
+  function checkData() {
+    // 对ap_ssid，ap_password进行非空，长度校验
+    const $modal = $(window.parent.document).find('#myModal')
+    const sta_ssid = $("#sta_ssid").val().trim();
+    const sta_password = $("#sta_password").val().trim();
+    if (sta_ssid === '') {
+      window.parent.notice($modal,'请输入Wifi名称');
+      return false;
+    }
+    if (sta_password === '') {
+      window.parent.notice($modal,'请输入Wifi密码');
+      return false;
+    }
+    if (sta_ssid.length < 4 || sta_ssid.length > 16) {
+      window.parent.notice($modal,'Wifi名称长度必须在4-16之间');
+      return false;
+    }
+    if (sta_password.length < 8 || sta_password.length > 16) {
+      window.parent.notice($modal,'Wifi密码长度必须在8-16之间');
+      return false;
+    }
+    return true;
+  }
+</script>
+</body>
+</html>

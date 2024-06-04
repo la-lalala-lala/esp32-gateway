@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>物联网设备平台</title>
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/font-awesome.min.css">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      color: #9cb17e;
+      background-color: #e8f3e2;
+    }
+  </style>
+</head>
+<body>
+<div class="row">
+  <div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="alert alert-success">重要！网关系统凭证关乎正常运行，请不要外泄网关密码！</div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="col-md-8">
+      <form class="form-horizontal" role="form">
+        <div class="form-group">
+          <label>密码</label>
+          <input type="password" id="password1" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>确认密码</label>
+          <input type="password" id="password2" class="form-control">
+        </div>
+        <div class="form-group">
+          <button type="button" class="btn btn-info" style="background-color:#9cb17e;border-color: transparent" id="submit"><span class="fa fa-check"></span>&nbsp;提交</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script src="./js/jquery.min.js"></script>
+<script src="./js/bootstrap.min.js"></script>
+<script type="module">
+  import {set_pwd_request} from './js/config.js'
+  function sendData(password) {
+    // 提交数据
+    const $modal = $(window.parent.document).find('#myModal')
+    $(window.parent.document).find(".loader").show();
+    set_pwd_request({password: password}).then(data=>{
+      $(window.parent.document).find(".loader").hide();
+      console.log(data)
+      if (data.code === 0) {
+        window.parent.notice($modal,'修改成功');
+      } else {
+        window.parent.notice($modal,'修改失败');
+      }
+    }).catch(error=>{
+      $(window.parent.document).find(".loader").show().hide();
+      window.parent.notice($modal,'网络发送异常，请稍后再试');
+      console.log('修改密码异常:',error);
+      return false;
+    })
+  }
+
+  $(function () {
+    $("#submit").on('click',function () {
+      // 获取密码
+      var password1 = $("#password1").val().trim();
+      var password2 = $("#password2").val().trim();
+      // 校验密码是否为空
+      if (password1 === "" || password2 === "") {
+        window.parent.notice($(window.parent.document).find("#myModal"), "密码不能为空！");
+        return;
+      }
+      // 校验两次的密码是否一致
+      if (password1 != password2) {
+        window.parent.notice($(window.parent.document).find("#myModal"), "两次密码不一致！");
+        return;
+      }
+      sendData(password2);
+    });
+  })
+</script>
+</body>
+</html>

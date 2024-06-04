@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>物联网设备平台</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        color: #9cb17e;
+        background-color: #e8f3e2;
+      }
+      /*覆写表格的标题头样式*/
+      caption {
+        color: #9cb17e;
+      }
+    </style>
+
+</head>
+<body>
+  <div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="alert alert-success">网关热点信息用于配置进入系统的入口地址，为使设备安全，请不要外泄！</div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <table class="table table-bordered">
+        <caption>当前设备热点信息</caption>
+        <colgroup>
+          <col width="20%"/>
+          <col width="30%"/>
+          <col width="20%"/>
+          <col width="30%"/>
+        </colgroup>
+        <tbody>
+        <tr>
+          <td class="text-right">主机IP:</td>
+          <td id="softAPIP"></td>
+          <td class="text-right">主机IPv6:</td>
+          <td id="softAPIPv6"></td>
+        </tr>
+        <tr>
+          <td class="text-right">主机SSID:</td>
+          <td id="SSID"></td>
+          <td class="text-right">主机广播IP:</td>
+          <td id="softAPBroadcastIP"></td>
+        </tr>
+        <tr>
+          <td class="text-right">主机物理地址:</td>
+          <td id="softAPmacAddress"></td>
+          <td class="text-right">主机网络ID:</td>
+          <td id="softAPNetworkID"></td>
+        </tr>
+        <tr>
+          <td class="text-right">已连接个数:</td>
+          <td id="softAPgetStationNum"></td>
+          <td class="text-right">主机名:</td>
+          <td id="softAPgetHostname"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="col-md-8">
+        <form class="form-horizontal" role="form">
+          <div class="form-group">
+            <label>热点名称</label>
+            <input type="text" id="ap_ssid" maxlength="16" minlength="4" class="form-control" placeholder="文本输入">
+          </div>
+          <div class="form-group">
+            <label>热点密码</label>
+            <input type="text" id="ap_password" maxlength="16" minlength="8" class="form-control" placeholder="文本输入">
+          </div>
+          <div class="form-group">
+            <button type="button" onclick="submitData()" class="btn btn-info" style="background-color:#9cb17e;border-color: transparent"><span class="fa fa-check"></span>&nbsp;提交</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script type="module">
+    import {get_ap_request,set_ap_request} from './js/config.js'
+
+    $(function () {
+      getData()
+    })
+
+    function getData() {
+      const $modal = $(window.parent.document).find('#myModal')
+      $(window.parent.document).find(".loader").show();
+      get_ap_request().then(data=>{
+        $(window.parent.document).find(".loader").hide();
+        console.log(data)
+        if (data.code === 0) {
+          // 渲染数据
+          $("#softAPBroadcastIP").text(data.data.softAPBroadcastIP);
+          $("#softAPgetHostname").text(data.data.softAPgetHostname);
+          $("#softAPgetStationNum").text(data.data.softAPgetStationNum);
+          $("#softAPNetworkID").text(data.data.softAPNetworkID);
+          $("#softAPmacAddress").text(data.data.softAPmacAddress);
+          $("#SSID").text(data.data.SSID);
+          $("#softAPIPv6").text(data.data.softAPIPv6);
+          $("#softAPIP").text(data.data.softAPIP);
+          $("#ap_ssid").val(data.data.ap_ssid);
+          $("#ap_password").val(data.data.ap_password);
+        } else {
+          window.parent.notice($modal,'');
+        }
+      }).catch(error=>{
+        $(window.parent.document).find(".loader").show().hide();
+        window.parent.notice($modal,'网络发送异常，请稍后再试');
+        console.log('获取ap数据异常:',error);
+        return false;
+      })
+    }
+
+    function submitData() {
+      const flag = checkData();
+      if (!flag) {
+        return
+      }
+      const ap_ssid = $("#ap_ssid").val().trim();
+      const ap_password = $("#ap_password").val().trim();
+      // 提交数据
+      const $modal = $(window.parent.document).find('#myModal')
+      $(window.parent.document).find(".loader").show();
+      set_ap_request({ssid: ap_ssid,password: ap_password}).then(data=>{
+        $(window.parent.document).find(".loader").hide();
+        console.log(data)
+        if (data.code === 0) {
+          window.parent.notice($modal,'修改成功');
+        } else {
+          window.parent.notice($modal,'修改失败');
+        }
+      }).catch(error=>{
+        $(window.parent.document).find(".loader").show().hide();
+        window.parent.notice($modal,'网络发送异常，请稍后再试');
+        console.log('设置ap数据异常:',error);
+        return false;
+      })
+    }
+
+    function checkData() {
+      // 对ap_ssid，ap_password进行非空，长度校验
+      const $modal = $(window.parent.document).find('#myModal')
+      const ap_ssid = $("#ap_ssid").val().trim();
+      const ap_password = $("#ap_password").val().trim();
+      if (ap_ssid === '') {
+        window.parent.notice($modal,'请输入热点名称');
+        return false;
+      }
+      if (ap_password === '') {
+        window.parent.notice($modal,'请输入热点密码');
+        return false;
+      }
+      if (ap_ssid.length < 4 || ap_ssid.length > 16) {
+        window.parent.notice($modal,'热点名称长度必须在4-16之间');
+        return false;
+      }
+      if (ap_password.length < 8 || ap_password.length > 16) {
+        window.parent.notice($modal,'热点密码长度必须在8-16之间');
+        return false;
+      }
+      return true;
+    }
+  </script>
+</body>
+</html>

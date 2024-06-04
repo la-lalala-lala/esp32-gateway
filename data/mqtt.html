@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>物联网设备平台</title>
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/font-awesome.min.css">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      color: #9cb17e;
+      background-color: #e8f3e2;
+    }
+  </style>
+</head>
+<body>
+<div class="row">
+  <div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="alert alert-success">当设备需要进行数据的远程上报和控制时，需要进行连接配置。</div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="col-md-8">
+      <form class="form-horizontal" role="form">
+        <div class="form-group form-check form-switch">
+          <label>是否开启</label>
+          &nbsp;
+          <input id="flag" type="checkbox">
+        </div>
+        <div class="form-group">
+          <label>MQTT连接状态</label>
+          &nbsp;
+          <input id="status" type="checkbox" disabled="disabled">
+        </div>
+        <div class="form-group form-check form-switch">
+          <label>服务器</label>
+          <input type="text" id="host" class="form-control" placeholder="文本输入">
+        </div>
+        <div class="form-group">
+          <label>端口</label>
+          <input type="text" id="port" class="form-control" placeholder="文本输入">
+        </div>
+        <div class="form-group">
+          <button type="button" onclick="submitData()" class="btn btn-info" style="background-color:#9cb17e;border-color: transparent"><span class="fa fa-check"></span>&nbsp;提交</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script src="./js/jquery.min.js"></script>
+<script src="./js/bootstrap.min.js"></script>
+<script type="module">
+  import {get_mqtt_request,set_mqtt_request} from './js/config.js'
+  $(function () {
+    getData()
+  })
+
+  function getData() {
+    const $modal = $(window.parent.document).find('#myModal')
+    $(window.parent.document).find(".loader").show();
+    get_mqtt_request().then(data=>{
+      $(window.parent.document).find(".loader").hide();
+      console.log(data)
+      if (data.code === 0) {
+        // 渲染数据
+        $("#host").val(data.data.host);
+        $("#port").val(data.data.port);
+        const status = data.data.status;
+        if("1" === status){
+          $("#status").prop("checked",true)
+        }
+        const flag = data.data.flag;
+        if("1" === flag){
+          $("#flag").prop("checked",true)
+        }
+      } else {
+        window.parent.notice($modal,'');
+      }
+    }).catch(error=>{
+      $(window.parent.document).find(".loader").show().hide();
+      window.parent.notice($modal,'网络发送异常，请稍后再试');
+      console.log('获取mqtt数据异常:',error);
+      return false;
+    })
+  }
+
+  function submitData() {
+    const flag = checkData();
+    if (!flag) {
+      return
+    }
+    const host = $("#host").val().trim();
+    const port = $("#port").val().trim();
+    const mqttFlag = $("#flag").is(":checked");
+    // 提交数据
+    const $modal = $(window.parent.document).find('#myModal')
+    $(window.parent.document).find(".loader").show();
+    set_mqtt_request({flag: true===mqttFlag?1:0, port: port, host: host}).then(data=>{
+      $(window.parent.document).find(".loader").hide();
+      console.log(data)
+      if (data.code === 0) {
+        window.parent.notice($modal,'修改成功');
+      } else {
+        window.parent.notice($modal,'修改失败');
+      }
+    }).catch(error=>{
+      $(window.parent.document).find(".loader").show().hide();
+      window.parent.notice($modal,'网络发送异常，请稍后再试');
+      console.log('设置mqtt异常:',error);
+      return false;
+    })
+  }
+
+  function checkData() {
+    const $modal = $(window.parent.document).find('#myModal')
+    const host = $("#host").val().trim();
+    const port = $("#port").val().trim();
+    if (host === '') {
+      window.parent.notice($modal,'请输入MQTT服务器地址');
+      return false;
+    }
+    if (port === '') {
+      window.parent.notice($modal,'请输入MQTT服务器端口');
+      return false;
+    }
+    return true;
+  }
+</script>
+</body>
+</html>

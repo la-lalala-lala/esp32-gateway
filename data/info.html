@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>物联网设备平台</title>
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/font-awesome.min.css">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      color: #9cb17e;
+      background-color: #e8f3e2;
+    }
+    /*仪表盘的样式*/
+    .dashboard-div-wrapper {
+      border-radius: 5px;
+      text-align: center;
+      padding: 15px;
+      color: #fff;
+      margin-bottom: 50px;
+    }
+    /*各个仪表的图标*/
+    .bk-clr-one {
+      background-color: #b9b739;
+    }
+    .bk-clr-two {
+      background-color: #f94c4c;
+    }
+    .bk-clr-three {
+      background-color: #119c7e;
+    }
+    .bk-clr-four {
+      background-color: #b739b9;
+    }
+    /*仪表盘图标*/
+    .dashboard-div-icon {
+      height: 75px;
+      width: 75px;
+      border: 2px solid #fff;
+      padding: 20px;
+      border-radius: 50%;
+      -webkit-border-radius: 50%;
+      -moz-border-radius: 50%;
+      font-size: 30px;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+    /*仪表盘的分割线，进度条*/
+    .dashboard-div-wrapper .progress {
+      height: 2px;
+    }
+    .progress {
+      height: 8px;
+      border-radius: 0;
+      -webkit-border-radius: 0;
+      -moz-border-radius: 0;
+    }
+
+    /*覆写表格的标题头样式*/
+    caption {
+      color: #9cb17e;
+    }
+  </style>
+</head>
+<body>
+  <div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="alert alert-success">当设备作为无线热点时，默认最大同时连接数为4个</div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-6">
+      <div class="dashboard-div-wrapper bk-clr-one">
+        <i class="fa fa-venus dashboard-div-icon"></i>
+        <div class="progress progress-striped active">
+          <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+        </div>
+        <h6>连接状态</h6>
+        <h5 id="connect_router_flag"></h5>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-6">
+      <div class="dashboard-div-wrapper bk-clr-two">
+        <i class="fa fa-edit dashboard-div-icon"></i>
+        <div class="progress progress-striped active">
+          <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+        </div>
+        <h6>已连接个数</h6>
+        <h5 id="softAPgetStationNum"></h5>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-6">
+      <div class="dashboard-div-wrapper bk-clr-three">
+        <i class="fa fa-cogs dashboard-div-icon"></i>
+        <div class="progress progress-striped active">
+          <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+        </div>
+        <h6>工作模式</h6>
+        <h5 id="getMode"></h5>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-6">
+      <div class="dashboard-div-wrapper bk-clr-four">
+        <i class="fa fa-bell-o dashboard-div-icon"></i>
+        <div class="progress progress-striped active">
+          <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+        </div>
+        <h6>重连模式</h6>
+        <h5 id="getAutoReconnect"></h5>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <table class="table table-bordered">
+        <caption>设备运行指标数据</caption>
+        <colgroup>
+          <col width="20%"/>
+          <col width="30%"/>
+          <col width="20%"/>
+          <col width="30%"/>
+        </colgroup>
+        <tbody>
+        <tr>
+          <td class="text-right">已连接网络:</td>
+          <td id="sta_ssid"></td>
+          <td class="text-right">无线热点名称:</td>
+          <td id="ap_ssid"></td>
+        </tr>
+        <tr>
+          <td class="text-right">设备状态:</td>
+          <td id="status"></td>
+          <td class="text-right">设备状态码:</td>
+          <td id="getStatusBits"></td>
+        </tr>
+        <tr>
+          <td class="text-right">Mqtt连接状态:</td>
+          <td id="connect_mqtt_flag"></td>
+          <td class="text-right">主机SSID:</td>
+          <td id="SSID"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script src="./js/jquery.min.js"></script>
+  <script src="./js/bootstrap.min.js"></script>
+  <script type="module">
+    import {get_home_request} from './js/config.js'
+
+    $(function () {
+      getData()
+    })
+
+    function getData() {
+      const $modal = $(window.parent.document).find('#myModal')
+      $(window.parent.document).find(".loader").show();
+      get_home_request().then(data=>{
+        $(window.parent.document).find(".loader").hide();
+        console.log(data)
+        if (data.code === 0) {
+          // 渲染数据
+          $("#connect_mqtt_flag").text(data.data.connect_mqtt_flag);
+          $("#connect_router_flag").text(data.data.connect_router_flag);
+          $("#getAutoReconnect").text(data.data.getAutoReconnect);
+          $("#getMode").text(data.data.getMode);
+          $("#softAPgetStationNum").text(data.data.softAPgetStationNum);
+          $("#status").text(data.data.status);
+          $("#getStatusBits").text(data.data.getStatusBits);
+          $("#SSID").text(data.data.SSID);
+          $("#sta_ssid").text(data.data.sta_ssid);
+          $("#ap_ssid").text(data.data.ap_ssid);
+        } else {
+          window.parent.notice($modal,'获取数据失败，请稍后重试！')
+        }
+      }).catch(error=>{
+        $(window.parent.document).find(".loader").show().hide();
+        window.parent.notice($modal,'网络发送异常，请稍后再试');
+        console.log('获取统计数据异常:',error);
+        return false;
+      })
+    }
+  </script>
+</body>
+</html>
