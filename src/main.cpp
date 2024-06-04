@@ -26,6 +26,14 @@ extern "C" {
  */
 #include <SPIFFS.h>
 
+
+/**
+ * 使用millis()代替delay()
+ * https://www.qutaojiao.com/21429.html
+ * 嵌入式项目
+ * https://randomnerdtutorials.com/
+ */
+
 AsyncWebServer server(80);
 // AsyncWebSocket ws("/ws");
 // https://www.codeleading.com/article/92785144869/
